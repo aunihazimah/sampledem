@@ -5,7 +5,7 @@ pipeline {
         // Path to your local WebMethods Integration Server installation (on host)
         WMSERVER_HOME = "C:/Users/vkraft_Auni/Documents/w/IntegrationServer"
         PACKAGE_NAME  = "employee.zip"
-        PACKAGE_PATH  = "${WORKSPACE}/${PACKAGE_NAME}"
+        PACKAGE_PATH  = "${WORKSPACE}/${PACKAGE_NAME}"   // zip in same folder as Jenkinsfile
         API_PORT      = "5555"
     }
 
@@ -20,23 +20,15 @@ pipeline {
 
         stage('Checkout SCM') {
             steps {
-                echo "Checking out latest package from Git..."
+                echo "📥 Checking out latest package from Git..."
                 checkout scm
             }
         }
 
         stage('Deploy WebMethods Package') {
             steps {
-                echo "Deploying ${PACKAGE_NAME} to local WebMethods IS..."
-                script {
-                    // Retry deployment up to 3 times if IS is busy
-                    retry(3) {
-                        bat """
-                            "${WMSERVER_HOME}/deployer/bin/deployer.bat" -silent -package "${PACKAGE_PATH}"
-                        """
-                    }
-                    echo "Deployment completed"
-                }
+                echo "⚠️ Skipping deploy - deployer not installed."
+                echo "Make sure ${PACKAGE_NAME} is already deployed manually on your local IS."
             }
         }
 
@@ -64,7 +56,7 @@ pipeline {
                     }
 
                     if (!ready) {
-                        error "API FAILED: ${api.method} ${api.path} not ready after 10 attempts"
+                        error "❌ API FAILED: ${api.method} ${api.path} not ready after 10 attempts"
                     }
                 }
             }
@@ -80,7 +72,7 @@ pipeline {
             echo "🎉 Pipeline succeeded!"
         }
         failure {
-            echo "Pipeline failed. Check logs for details."
+            echo "❌ Pipeline failed. Check logs for details."
         }
     }
 }
